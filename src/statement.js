@@ -19,7 +19,7 @@ function getAmount(play, perf) {
   }
   return result;
 }
-function calculateCredits(invoice,plays){
+function calculateCredits(invoice, plays) {
   let result = 0;
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
@@ -28,8 +28,14 @@ function calculateCredits(invoice,plays){
   }
   return result;
 }
-function renderPlainText(){
-
+function renderPlainText(data) {
+  let result = "";
+  for (let line of data.textLine) {
+    result +=line;
+  }
+  result += `Amount owed is ${usd(data.totalAmount)}\n`;
+  result += `You earned ${data.volumeCredits} credits \n`;
+  return result;
 }
 function usd(thisAmount) {
   return new Intl.NumberFormat('en-US', {
@@ -38,8 +44,8 @@ function usd(thisAmount) {
     minimumFractionDigits: 2,
   }).format(thisAmount / 100);
 }
-function totalAllAmount(invoice, plays){
-  let totalAmount=0;
+function totalAllAmount(invoice, plays) {
+  let totalAmount = 0;
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
     const thisAmount = getAmount(play, perf);
@@ -47,20 +53,26 @@ function totalAllAmount(invoice, plays){
   }
   return totalAmount;
 }
-function statement(invoice, plays) {
-  const totalAmount = totalAllAmount(invoice, plays);
-  const volumeCredits = calculateCredits(invoice,plays);
-  let result = `Statement for ${invoice.customer}\n`;
+function renderHtmlStatement(data){
 
+}
+function createStatementData(invoice, plays) {
+  let data = {
+    totalAmount: totalAllAmount(invoice, plays),
+    volumeCredits: calculateCredits(invoice, plays),
+    textLine:[`Statement for ${invoice.customer}\n`]
+  }
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
     const thisAmount = getAmount(play, perf);
-    result += ` ${play.name}: ${usd(thisAmount)} (${perf.audience} seats)\n`;
+    data.textLine.push(` ${play.name}: ${usd(thisAmount)} (${perf.audience} seats)\n`);
   }
-  
-  result += `Amount owed is ${usd(totalAmount)}\n`;
-  result += `You earned ${volumeCredits} credits \n`;
-  return result;
+  return data;
+}
+
+function statement(invoice, plays) {
+  let data = createStatementData(invoice, plays)
+  return renderPlainText(data);
 }
 
 module.exports = {
