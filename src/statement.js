@@ -29,9 +29,9 @@ function calculateCredits(invoice, plays) {
   return result;
 }
 function renderPlainText(data) {
-  let result = "";
+  let result = `Statement for ${data.customer}\n`;
   for (let line of data.textLine) {
-    result +=line;
+    result +=` ${line.name}: ${usd(line.thisAmount)} (${line.audience} seats)\n`;
   }
   result += `Amount owed is ${usd(data.totalAmount)}\n`;
   result += `You earned ${data.volumeCredits} credits \n`;
@@ -58,21 +58,24 @@ function renderHtmlStatement(data){
 }
 function createStatementData(invoice, plays) {
   let data = {
+    customer:invoice.customer,
     totalAmount: totalAllAmount(invoice, plays),
     volumeCredits: calculateCredits(invoice, plays),
-    textLine:[`Statement for ${invoice.customer}\n`]
+    textLine:[]
   }
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
     const thisAmount = getAmount(play, perf);
-    data.textLine.push(` ${play.name}: ${usd(thisAmount)} (${perf.audience} seats)\n`);
+    data.textLine.push({name:play.name,thisAmount:thisAmount,audience:perf.audience});
   }
   return data;
 }
-
-function statement(invoice, plays) {
+function renderStatement(invoice, plays){
   let data = createStatementData(invoice, plays)
   return renderPlainText(data);
+}
+function statement(invoice, plays) {
+  return renderStatement(invoice, plays);
 }
 
 module.exports = {
