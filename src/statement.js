@@ -37,6 +37,18 @@ function renderPlainText(data) {
   result += `You earned ${data.volumeCredits} credits \n`;
   return result;
 }
+function renderHtmlStatement(data){
+  let result = `<h1>Statement for ${data.customer}</h1>\n`;
+  result +='<table>\n';
+  result += '<tr><th>play</th><th>seats</th><th>cost</th></tr>\n';
+  for (let line of data.textLine) {
+    result +=`<tr><td>${line.name}</td><td>${line.audience}</td><td>${usd(line.thisAmount)}</td></tr>\n`;
+  }
+  result+='</table>\n';
+  result += `<p>Amount owed is <em>${usd(data.totalAmount)}</em></p>\n`;
+  result += `<p>You earned <em>${data.volumeCredits}</em> credits</p>\n`;
+  return result;
+}
 function usd(thisAmount) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -53,9 +65,7 @@ function totalAllAmount(invoice, plays) {
   }
   return totalAmount;
 }
-function renderHtmlStatement(data){
 
-}
 function createStatementData(invoice, plays) {
   let data = {
     customer:invoice.customer,
@@ -71,7 +81,7 @@ function createStatementData(invoice, plays) {
   return data;
 }
 function renderStatement(invoice, plays){
-  let data = createStatementData(invoice, plays)
+  let data = createStatementData(invoice, plays);
   return renderPlainText(data);
 }
 function statement(invoice, plays) {
@@ -80,4 +90,6 @@ function statement(invoice, plays) {
 
 module.exports = {
   statement,
+  renderHtmlStatement,
+  createStatementData,
 };
