@@ -19,6 +19,13 @@ function geAmount(play, perf) {
   }
   return result;
 }
+function calculateCredits(audience,type){
+  let result = 0;
+  result = Math.max(audience - 30, 0);
+  // add extra credit for every ten comedy attendees
+  if ('comedy' === type) result += Math.floor(audience / 5);
+  return result;
+}
 function usd(thisAmount) {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -35,9 +42,7 @@ function statement(invoice, plays) {
     const play = plays[perf.playID];
     const thisAmount = geAmount(play, perf);
     // add volume credits
-    volumeCredits += Math.max(perf.audience - 30, 0);
-    // add extra credit for every ten comedy attendees
-    if ('comedy' === play.type) volumeCredits += Math.floor(perf.audience / 5);
+    volumeCredits += calculateCredits(perf.audience,play.type);
     //print line for this order
     result += ` ${play.name}: ${usd(thisAmount)} (${perf.audience} seats)\n`;
     totalAmount += thisAmount;
