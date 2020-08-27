@@ -19,10 +19,14 @@ function geAmount(play, perf) {
   }
   return result;
 }
-function calculateCredits(audience,type){
+function calculateCredits(invoice,plays){
   let result = 0;
-  result = Math.max(audience - 30, 0);
-  if ('comedy' === type) result += Math.floor(audience / 5);
+  for (let perf of invoice.performances) {
+    const play = plays[perf.playID];
+    result += Math.max(perf.audience - 30, 0);
+    if ('comedy' === play.type) result += Math.floor(perf.audience / 5);
+    //calculateCredits(perf.audience,play.type);
+  }
   return result;
 }
 function renderPlainText(){
@@ -39,10 +43,8 @@ function statement(invoice, plays) {
   let totalAmount = 0;
   let volumeCredits = 0;
   let result = `Statement for ${invoice.customer}\n`;
-  for (let perf of invoice.performances) {
-    const play = plays[perf.playID];
-    volumeCredits += calculateCredits(perf.audience,play.type);
-  }
+
+  volumeCredits = calculateCredits(invoice,plays);
   for (let perf of invoice.performances) {
     const play = plays[perf.playID];
     const thisAmount = geAmount(play, perf);
@@ -50,7 +52,6 @@ function statement(invoice, plays) {
     result += ` ${play.name}: ${usd(thisAmount)} (${perf.audience} seats)\n`;
     totalAmount += thisAmount;
   }
-
   
   result += `Amount owed is ${usd(totalAmount)}\n`;
   result += `You earned ${volumeCredits} credits \n`;
